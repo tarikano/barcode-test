@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>Тест камери</title>
+    <title>Barcode Scanner</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -16,28 +16,59 @@
             border-radius: 10px;
             margin-top: 20px;
         }
+        #result {
+            margin-top: 20px;
+            font-size: 24px;
+            color: green;
+        }
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
 
-<h1>Тест камери</h1>
-<p>Якщо камера працює — нижче зʼявиться відео з неї.</p>
+<h1>Сканер штрихкодів</h1>
+<p>Наведи камеру на штрихкод — результат зʼявиться нижче.</p>
 
 <video id="video" autoplay playsinline></video>
 
+<div id="result">Очікування сканування…</div>
+
+<button onclick="copyCode()">Скопіювати код</button>
+
+<script src="https://unpkg.com/@zxing/library@latest"></script>
+
 <script>
-    async function startCamera() {
+    const codeReader = new ZXing.BrowserMultiFormatReader();
+    const video = document.getElementById('video');
+    const resultBox = document.getElementById('result');
+
+    async function startScanner() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: "environment" }
+            const devices = await codeReader.listVideoInputDevices();
+            const backCamera = devices.find(d => d.label.toLowerCase().includes("back")) || devices[0];
+
+            await codeReader.decodeFromVideoDevice(backCamera.deviceId, video, (result, err) => {
+                if (result) {
+                    resultBox.innerText = "Знайдено: " + result.text;
+                    window.lastCode = result.text;
+                }
             });
-            document.getElementById("video").srcObject = stream;
-        } catch (err) {
-            alert("Помилка доступу до камери: " + err);
+        } catch (e) {
+            resultBox.innerText = "Помилка: " + e;
         }
     }
 
-    startCamera();
+    function copyCode() {
+        if (!window.lastCode) return alert("Немає коду для копіювання");
+        navigator.clipboard.writeText(window.lastCode);
+        alert("Код скопійовано!");
+    }
+
+    startScanner();
 </script>
 
 </body>
