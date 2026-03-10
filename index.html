@@ -2,29 +2,42 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>Тест скрипта</title>
+    <title>Тест камери</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            padding: 30px;
+            padding: 20px;
             text-align: center;
         }
-        #status {
-            font-size: 24px;
-            color: green;
+        video {
+            width: 90%;
+            max-width: 500px;
+            border: 2px solid #333;
+            border-radius: 10px;
             margin-top: 20px;
         }
     </style>
 </head>
 <body>
 
-<h1>Перевірка роботи скрипта</h1>
-<p>Якщо все працює — нижче зʼявиться повідомлення.</p>
+<h1>Тест камери</h1>
+<p>Якщо камера працює — нижче зʼявиться відео з неї.</p>
 
-<div id="status">⏳ Завантаження...</div>
+<video id="video" autoplay playsinline></video>
 
 <script>
-    document.getElementById("status").innerText = "✅ Скрипт працює!";
+    async function startCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment" }
+            });
+            document.getElementById("video").srcObject = stream;
+        } catch (err) {
+            alert("Помилка доступу до камери: " + err);
+        }
+    }
+
+    startCamera();
 </script>
 
 </body>
