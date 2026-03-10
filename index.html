@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Тест скрипта</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 30px;
+            text-align: center;
+        }
+        #status {
+            font-size: 24px;
+            color: green;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Перевірка роботи скрипта</h1>
+<p>Якщо все працює — нижче зʼявиться повідомлення.</p>
+
+<div id="status">⏳ Завантаження...</div>
+
+<script>
+    document.getElementById("status").innerText = "✅ Скрипт працює!";
+</script>
+
+</body>
+</html>
