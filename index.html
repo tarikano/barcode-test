@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>Barcode Scanner</title>
+    <title>Fast Barcode Scanner</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -21,54 +21,55 @@
             font-size: 24px;
             color: green;
         }
-        button {
-            margin-top: 15px;
-            padding: 10px 20px;
-            font-size: 18px;
-        }
     </style>
 </head>
 <body>
 
-<h1>Сканер штрихкодів</h1>
-<p>Наведи камеру на штрихкод — результат зʼявиться нижче.</p>
+<h1>Швидкий сканер штрихкодів</h1>
+<p>Наведи камеру на штрихкод — результат зʼявиться швидше.</p>
 
 <video id="video" autoplay playsinline></video>
-
-<div id="result">Очікування сканування…</div>
-
-<button onclick="copyCode()">Скопіювати код</button>
+<div id="result">Очікування…</div>
 
 <script src="https://unpkg.com/@zxing/library@latest"></script>
 
 <script>
-    const codeReader = new ZXing.BrowserMultiFormatReader();
     const video = document.getElementById('video');
     const resultBox = document.getElementById('result');
 
-    async function startScanner() {
-        try {
-            const devices = await codeReader.listVideoInputDevices();
-            const backCamera = devices.find(d => d.label.toLowerCase().includes("back")) || devices[0];
+    const codeReader = new ZXing.BrowserBarcodeReader();
 
-            await codeReader.decodeFromVideoDevice(backCamera.deviceId, video, (result, err) => {
-                if (result) {
-                    resultBox.innerText = "Знайдено: " + result.text;
-                    window.lastCode = result.text;
+    async function start() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: "environment",
+                    width: { ideal: 640 },
+                    height: { ideal: 480 },
+                    frameRate: { ideal: 15 }
                 }
             });
-        } catch (e) {
-            resultBox.innerText = "Помилка: " + e;
+
+            video.srcObject = stream;
+
+            // Аналіз кожні 300 мс
+            setInterval(async () => {
+                try {
+                    const result = await codeReader.decodeOnceFromVideoElement(video);
+                    if (result) {
+                        resultBox.innerText = "Знайдено: " + result.text;
+                    }
+                } catch (e) {
+                    // ігноруємо помилки, поки не знайдено код
+                }
+            }, 300);
+
+        } catch (err) {
+            resultBox.innerText = "Помилка: " + err;
         }
     }
 
-    function copyCode() {
-        if (!window.lastCode) return alert("Немає коду для копіювання");
-        navigator.clipboard.writeText(window.lastCode);
-        alert("Код скопійовано!");
-    }
-
-    startScanner();
+    start();
 </script>
 
 </body>
